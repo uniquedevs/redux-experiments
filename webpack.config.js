@@ -22,16 +22,21 @@ module.exports = {
           {
             loader: 'babel-loader',
             options: { presets: ['es2015', 'react'] }
+          },
+          {
+            loader: "source-map-loader",
+            options : { enforce: "pre" }
           }
         ]
       }
     ]
   },
   devServer: {
-    port: 8080,
+    port: 9000,
     contentBase: path.resolve(__dirname, './build'),
     watchContentBase: true,
     stats: 'errors-only',
     open: true
-  }
+  },
+  devtool:"source-map"
 };

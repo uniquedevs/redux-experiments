@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node_modules/.bin/webpack --config webpack.config.js",
+    "build": "node_modules/.bin/webpack --config webpack.config.js -d",
     "start": "node_modules/.bin/webpack-dev-server --inline"
   },
   "author": "",
@@ -16,6 +16,7 @@
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "redux": "^3.7.2",
+    "source-map-loader": "^0.2.3",
     "webpack": "^3.10.0",
     "webpack-dev-server": "^2.10.1"
   },
