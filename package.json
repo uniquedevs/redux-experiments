@@ -21,6 +21,7 @@
     "webpack-dev-server": "^2.10.1"
   },
   "dependencies": {
+    "deep-freeze": "0.0.1",
     "expect": "^22.0.6",
     "react": "^16.2.0",
     "react-dom": "^16.2.0"

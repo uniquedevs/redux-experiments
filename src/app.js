@@ -1,77 +1,43 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-//import { createStore } from 'redux';
+import expect, { createSpy, spyOn, isSpy } from 'expect';
+import deepFreeze from 'deep-freeze';
 
-import expect, { createSpy, spyOn, isSpy } from 'expect'
-
-const divApp = document.getElementById('app');
-
-const App = ({state, onIncrease, onDecrease}) => (
-  <div>
-    <p>{state}</p>
-    <input type='button' onClick={onIncrease} value="+"/>
-    <input type='button' onClick={onDecrease} value="-"/>
-  </div>
-);
-
-const counter = (state = 0, action)  => {
-  switch (action.type) {
-    case 'INCREASE' :
-      return state + 1;
-    case 'DECREASE':
-      return state - 1;
-    default:
+const todos = (store = [], action) => {
+  switch( action.type) {
+    case 'ADD_TODO' :
+      return [
+        ...store,
+        {
+          id: action.id,
+          text: action.text,
+          complete: false
+        }
+      ];
+    default :
       return state;
   }
 };
 
-const createStore = reducer => {
-  let listenners = [], state;
-
-  const getState = () => {
-    console.log(state);
-    return state;
+const testAddTodo = () => {
+  let stateBeforeAdd = [];
+  let action = {
+    type: 'ADD_TODO',
+    id: 1,
+    text: 'new'
   };
-  const dispatch = (action) => {
-    state = reducer(state, action);
-    listenners.forEach( listenner => listenner());
-  };
-  const subscribe = (listenner) => {
-    listenners.push(listenner);
-    return () => {
-      listenners.filter( l => l === listenner ? listenners.remove(listenner) : null)
-    }
-  };
+  let stateAfterAdd = [{
+    id: 1,
+    text: 'new',
+    complete: false
+  }];
 
-  dispatch( {type:''} );
+  deepFreeze(stateBeforeAdd);
+  deepFreeze(action);
 
-  return {
-    getState, dispatch, subscribe
-  }
-
+  expect(
+    todos(stateBeforeAdd, action)
+  ).toEqual(stateAfterAdd)
 };
 
-const store = createStore(counter);
+testAddTodo();
 
-const increase = () => {
-  store.dispatch( {type:'INCREASE'} );
-};
-
-const decrease = () => {
-  store.dispatch( {type:'DECREASE'} );
-};
-
-const render = () => {
-  ReactDOM.render(
-    <App
-      state={ store.getState() }
-      onIncrease={ increase }
-      onDecrease={ decrease }
-    />,
-    divApp
-  )
-}
-
-store.subscribe(render);
-
-render();
+console.log('all tests pass');
