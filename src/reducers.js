@@ -1,6 +1,6 @@
 import expect, { createSpy, spyOn, isSpy } from 'expect';
 import deepFreeze from 'deep-freeze';
-//import { combineReducers } from 'redux';
+import { combineReducers } from 'redux';
 
 export const todo = (state, action) => {
   switch( action.type ) {
@@ -34,7 +34,7 @@ export const todos = (state = [], action) => {
   }
 };
 
-export const visibilityFilter = (state = 'VISIBLE', action) => {
+export const visibilityFilter = (state = 'ALL', action) => {
   switch(action.type) {
     case 'SET_VISIBILITY_FILTER':
       return action.filter;
@@ -56,11 +56,11 @@ export const appReducerManual = (state = {}, action) => {
     }
 };
 
-const combineReducers = (reducers) => (state = {}, action) => {
-  return Object.keys(reducers).reduce(
-    (nextState, key) => Object.assign(nextState, {[key] : reducers[key].call(null, state[key], action)}), {}
-  )
-};
+// const combineReducers = (reducers) => (state = {}, action) => {
+//   return Object.keys(reducers).reduce(
+//     (nextState, key) => Object.assign(nextState, {[key] : reducers[key].call(null, state[key], action)}), {}
+//   )
+// };
 
 export const appReducer = combineReducers({
   todos,

@@ -1,103 +1,123 @@
-import * as reducers from './reducers';
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { createStore } from 'redux';
-import deepFreeze from "deep-freeze";
-import expect from "expect";
+import { appReducer } from './reducers';
 
-const testAddTodo = () => {
-  let stateBeforeAdd = [];
-  let action = {
-    type: 'ADD_TODO',
-    id: 1,
-    text: 'new'
-  };
-  let stateAfterAdd = [{
-    id: 1,
-    text: 'new',
-    complete: false
-  }];
+const store = createStore(appReducer);
+const appDiv = document.getElementById('app');
 
-  deepFreeze(stateBeforeAdd);
-  deepFreeze(action);
+let todoIndex = 0;
 
-  expect(
-    reducers.todos(stateBeforeAdd, action)
-  ).toEqual(stateAfterAdd)
+const Todo = ({onClick, complete, text}) => (
+  <li
+    onClick={onClick}
+    style={ complete ? {'textDecoration':'line-through'} : {}}>
+    {text}
+  </li>
+);
+
+const TodoList = ({ todos, onTodoClick }) => (
+  <ul>
+    {todos ? todos.map( (todo, idx) => (
+      <Todo
+        key={idx}
+        {...todo}
+        onClick={ () => onTodoClick(todo.id) }
+      />
+    )) : null}
+  </ul>
+);
+
+const AddTodo = ({ onAddClick }) => {
+  let todoInput = null;
+  return (
+    <div>
+      <input type='text'
+           ref={ node => todoInput = node }
+      />
+      <button onClick={ () => onAddClick(todoInput.value)}>
+        ADD
+      </button>
+  </div>)
 };
 
-const testToggleTodo = () => {
-  let stateBeforeAdd = [{
-    id: 1,
-    text: 'new',
-    complete: false
-  }];
-  let action = {
-    type: 'TOGGLE_TODO',
-    id: 1,
-  };
-  let stateAfterAdd = [{
-    id: 1,
-    text: 'new',
-    complete: true
-  }];
+const Footer = () => (
+  <div>
+    <FilterLink filter='ALL'>Show all</FilterLink>
+    <FilterLink filter='ACTIVE'>Show only active</FilterLink>
+  </div>
+);
 
-  deepFreeze(stateBeforeAdd);
-  deepFreeze(action);
-
-  expect(
-    reducers.todos(stateBeforeAdd, action)
-  ).toEqual(stateAfterAdd)
+const Link = ({ text, active, onClick }) => {
+  return active ? <span>{text}</span>  : <button onClick={ onClick }>{text}</button>
 };
 
-testAddTodo();
-
-testToggleTodo();
-
-console.log('simple reducers tests pass');
-
-const testAppReducer = () => {
-  const store = createStore(reducers.appReducer);
-  let action = {
-    type: 'ADD_TODO',
-    id: 1,
-    text: 'new'
-  };
-  let stateAfterAdd = {
-    todos: [{
-      id: 1,
-      text: 'new',
-      complete: false
-    }],
-    visibilityFilter: 'VISIBLE'
-  };
-  deepFreeze(action);
-
-  store.dispatch(action);
-
-  expect(
-    store.getState()
-  ).toEqual(stateAfterAdd);
-
-  // let action2 = {
-  //   type: 'SET_VISIBILITY_FILTER',
-  //   filter: 'HIDDEN'
-  // };
-  // let stateAfterSetVisFilter = {
-  //   todos: [{
-  //     id: 1,
-  //     text: 'new',
-  //     complete: false
-  //   }],
-  //   visibilityFilter: 'HIDDEN'
-  // };
-  //
-  // store.dispatch(action2);
-  //
-  // expect(
-  //   store.getState()
-  // ).toEqual(stateAfterSetVisFilter);
-
+const FilterLink = ({filter, children}) => {
+  const props = store.getState();
+  const dispatch = store.dispatch;
+  return (
+    <Link
+      active={filter === props.visibilityFilter}
+      text={children}
+      onClick={ () => {
+        dispatch({
+          type: 'SET_VISIBILITY_FILTER',
+          filter
+        })
+      }}
+    />
+  )
 };
 
-testAppReducer();
+const TodoApp = ( props ) => {
+  return (
+    <div>
+      <AddTodo
+        onAddClick={ text => {
+          store.dispatch(
+            {
+              type: 'ADD_TODO',
+              text: text,
+              id: todoIndex++
+            })
+          }
+        }
+      />
+      <TodoList
+        todos={getVisibilityTodos(props)}
+        onTodoClick={ id => {
+          store.dispatch(
+            {
+              type: 'TOGGLE_TODO',
+              id
+            }
+          )
+        }}
+      />
+      <Footer/>
 
-console.log('combined reducer tests pass');
+    </div>
+  )
+};
+
+const getVisibilityTodos = ({todos, visibilityFilter}) => {
+  switch(visibilityFilter) {
+    case 'ALL':
+      return todos;
+    case 'ACTIVE':
+      return todos.filter( todo => !todo.complete );
+  }
+};
+
+const render = () => (
+  ReactDOM.render(
+    <TodoApp { ...store.getState() }/>,
+      appDiv
+    )
+);
+
+store.subscribe(render);
+
+render();
+
+
