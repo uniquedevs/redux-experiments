@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import { createStore } from 'redux';
+
 import { appReducer } from './reducers';
 
-const store = createStore(appReducer);
+
 const appDiv = document.getElementById('app');
 
 let todoIndex = 0;
 
-const Todo = ({onClick, complete, text}) => (
+const Todo = ({ onClick, complete, text }) => (
   <li
     onClick={onClick}
     style={ complete ? {'textDecoration':'line-through'} : {}}>
@@ -28,19 +30,6 @@ const TodoList = ({ todos, onTodoClick }) => (
   </ul>
 );
 
-const AddTodo = ({ onAddClick }) => {
-  let todoInput = null;
-  return (
-    <div>
-      <input type='text'
-           ref={ node => todoInput = node }
-      />
-      <button onClick={ () => onAddClick(todoInput.value)}>
-        ADD
-      </button>
-  </div>)
-};
-
 const Footer = () => (
   <div>
     <FilterLink filter='ALL'>Show all</FilterLink>
@@ -48,45 +37,66 @@ const Footer = () => (
   </div>
 );
 
+class FilterLink extends Component {
+  componentDidMount() {
+    const { store } = this.context;
+    this.unsubcribe = store.subscribe( () => {
+      this.forceUpdate();
+    })
+  }
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+  render() {
+    const { store } = this.context;
+    const { visibilityFilter } = store.getState();
+    const dispatch = store.dispatch;
+    const { filter, children } = this.props;
+    return (
+      <Link
+        active={filter === visibilityFilter}
+        text={children}
+        onClick={ () => {
+          dispatch({
+            type: 'SET_VISIBILITY_FILTER',
+            filter
+          })
+        }}
+      />
+    )
+  }
+}
+
+FilterLink.contextTypes = {
+  store: PropTypes.object
+};
+
 const Link = ({ text, active, onClick }) => {
   return active ? <span>{text}</span>  : <button onClick={ onClick }>{text}</button>
 };
 
-const FilterLink = ({filter, children}) => {
-  const props = store.getState();
-  const dispatch = store.dispatch;
-  return (
-    <Link
-      active={filter === props.visibilityFilter}
-      text={children}
-      onClick={ () => {
-        dispatch({
-          type: 'SET_VISIBILITY_FILTER',
-          filter
-        })
-      }}
-    />
-  )
-};
+class VisibleTodoList extends Component {
+  componentDidMount() {
 
-const TodoApp = ( props ) => {
-  return (
-    <div>
-      <AddTodo
-        onAddClick={ text => {
-          store.dispatch(
-            {
-              type: 'ADD_TODO',
-              text: text,
-              id: todoIndex++
-            })
-          }
-        }
-      />
+    const {store} = this.context;
+    this.unsubcribe = store.subscribe( () => {
+      this.forceUpdate();
+    })
+  }
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
+  render() {
+    const {store} = this.context;
+    const state = store.getState();
+    const todos = getVisibilityTodos(state);
+    const dispatch = store.dispatch;
+
+    return (
       <TodoList
-        todos={getVisibilityTodos(props)}
+        todos={todos}
         onTodoClick={ id => {
-          store.dispatch(
+          dispatch(
             {
               type: 'TOGGLE_TODO',
               id
@@ -94,8 +104,47 @@ const TodoApp = ( props ) => {
           )
         }}
       />
-      <Footer/>
+    )
+  }
+}
 
+VisibleTodoList.contextTypes = {
+  store: PropTypes.object
+};
+
+const AddTodo = (props, { store }) => {
+  const dispatch = store.dispatch;
+  let todoInput = null;
+  return (
+    <div>
+      <input type='text'
+             ref={ node => todoInput = node }
+      />
+      <button onClick={ () => {
+        dispatch(
+          {
+            type: 'ADD_TODO',
+            text: todoInput.value,
+            id: todoIndex++
+          }
+        )
+      }}>
+      ADD
+      </button>
+    </div>
+  )
+};
+
+AddTodo.contextTypes = {
+  store: PropTypes.object
+};
+
+const TodoApp = () => {
+  return (
+    <div>
+      <AddTodo/>
+      <VisibleTodoList/>
+      <Footer/>
     </div>
   )
 };
@@ -109,15 +158,27 @@ const getVisibilityTodos = ({todos, visibilityFilter}) => {
   }
 };
 
-const render = () => (
-  ReactDOM.render(
-    <TodoApp { ...store.getState() }/>,
-      appDiv
-    )
+class Provider extends Component {
+  getChildContext() {
+    return {
+      store: this.props.store
+    };
+  }
+  render() {
+    return this.props.children;
+  }
+}
+
+Provider.childContextTypes = {
+  store: PropTypes.object
+};
+
+
+ReactDOM.render(
+  <Provider store={ createStore(appReducer) }>
+    <TodoApp/>
+  </Provider>,
+  appDiv
 );
-
-store.subscribe(render);
-
-render();
 
 
