@@ -19,18 +19,6 @@ const Todo = ({ onClick, complete, text }) => (
   </li>
 );
 
-const TodoList = ({ todos, onTodoClick }) => (
-  <ul>
-    {todos ? todos.map( (todo, idx) => (
-      <Todo
-        key={idx}
-        {...todo}
-        onClick={ () => onTodoClick(todo.id) }
-      />
-    )) : null}
-  </ul>
-);
-
 const Footer = () => (
   <div>
     <FilterLink filter='ALL'>Show all</FilterLink>
@@ -95,19 +83,20 @@ const mapDispatchToProps = (dispatch) => {
   }
 };
 
-class _VisibleTodoList extends Component {
-  render() {
-    return (
-      <TodoList
-        todos={ this.props.todos }
-        onTodoClick={ this.props.onTodoClick }
+const TodoList = ({ todos, onTodoClick }) => (
+  <ul>
+    {todos ? todos.map( (todo, idx) => (
+      <Todo
+        key={idx}
+        {...todo}
+        onClick={ () => onTodoClick(todo.id) }
       />
-    )
-  }
-}
+    )) : null}
+  </ul>
+);
 
 
-const VisibleTodoList = connect(mapStateToProps, mapDispatchToProps)(_VisibleTodoList);
+const VisibleTodoList = connect(mapStateToProps, mapDispatchToProps)(TodoList);
 
 VisibleTodoList.contextTypes = {
   store: PropTypes.object
