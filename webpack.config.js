@@ -11,7 +11,9 @@ module.exports = {
       'react-dom',
       'redux',
       'react-redux',
-      'redux-logger'
+      'redux-logger',
+      'redux-thunk',
+      'react-bootstrap'
     ]
   },
   output: {

@@ -1,13 +1,12 @@
 import * as React from 'react';
 
-import { api } from './endpoints/api';
+import FolderApp from './folder-app/FolderApp';
 
 const App = () => (
-    <div>
-        <a href="javascript:window.open('https://api.imgur.com/oauth2/authorize?client_id=d1317e86556994a&response_type=token&state=none')">Authorize</a>
-    </div>
+  <div>
+    <a href="javascript:window.open('https://api.imgur.com/oauth2/authorize?client_id=d1317e86556994a&response_type=token&state=none')">Authorize</a>
+    <FolderApp />
+  </div>
 );
-
-api.get('https://api.imgur.com/3/account/me/images').then(console.log);
 
 export default App;
