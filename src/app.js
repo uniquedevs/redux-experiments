@@ -8,8 +8,6 @@ const App = () => (
     </div>
 );
 
-api().get('https://api.imgur.com/3/account/me/images').then(console.log);
-
-
+api.get('https://api.imgur.com/3/account/me/images').then(console.log);
 
 export default App;

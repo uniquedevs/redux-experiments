@@ -1,19 +1,31 @@
-export const api = () => {
-	const headers = {
-		Authorization: 'Bearer 33f1e0c38454747d065499a9fa5c867718548f65'
-	};
-	const api = Object.keys(methods).reduce(
-		(api, key) => (url, params) => window.fetch(url, {  })
-	)
+const headers = new Headers({
+  Authorization: 'Bearer 42c9fae3b4d4c4ebe7f154975482cb8bfff8e8ed'
+});
+
+const init = {
+	headers
 };
 
 const methods = {
 	get: {
-			headers: {
-				Authorization: 'Bearer 33f1e0c38454747d065499a9fa5c867718548f65'
-			}
-		})
-			.then(resp => resp.json())
-			.then(resp => resp.data)
+		init: Object.assign(init, {
+			method: 'GET'
+		}),
+		onSucess: resp => Promise.resolve(resp.json())
+			.then(resp => resp.data),
+		onError: err => Promise.reject(err)
 	}
 };
+
+export const api = Object.keys(methods).reduce(
+  (api, key) => Object.assign(api, {
+    [key]: (url, params) => window.fetch(url, methods[key].init)
+        .then(response => response.ok && response || Promise.reject('Network response was not ok.'))
+        .then(methods[key].onSucess)
+        .catch(methods[key].onError)
+    }),
+  {}
+);
+
+// api.get(url)
+// api.post(url, body)

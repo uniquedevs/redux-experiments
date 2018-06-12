@@ -1,4 +1,6 @@
 const path = require('path');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const webpack = require('webpack');
 
 module.exports = {
   context: path.resolve(__dirname, './src'),
@@ -7,6 +9,9 @@ module.exports = {
     vendor: [
       'react',
       'react-dom',
+      'redux',
+      'react-redux',
+      'redux-logger'
     ]
   },
   output: {
@@ -31,6 +36,12 @@ module.exports = {
       }
     ]
   },
+  plugins: [
+    // new BundleAnalyzerPlugin({
+    //   analyzerMode: 'static'
+    // }),
+    new webpack.optimize.CommonsChunkPlugin('vendor'),
+  ],
   devServer: {
     port: 9000,
     contentBase: path.resolve(__dirname, './build'),
