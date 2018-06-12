@@ -47,12 +47,23 @@ export const mapStateToProps = (state) => ({
   todos: getVisibilityTodos(state)
 });
 
-export const mapDispatchToProps = (dispatch) => ({
-    onTodoClick: id => {
-      dispatch(toggleTodo(id))
-    }
-  }
-);
+const toggleTodoPromise = (id, dispatch) =>
+  new Promise( resolve => {
+    dispatch(toggleTodo(id));
+    setTimeout( () => {
+      resolve(id);
+    }, 1000)
+  });
+
+
+const onTodoClick = (id) => dispatch => {
+  toggleTodoPromise(id, dispatch)
+    .then( id => dispatch(toggleTodo(id)))
+};
+
+export const mapDispatchToProps = {
+  onTodoClick
+};
 
 export const mapDispatchToAddProps = {
   addTodo
