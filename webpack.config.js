@@ -35,6 +35,10 @@ module.exports = {
             options : { enforce: "pre" }
           }
         ]
+      },
+      {
+        test: /\.css$/,
+        loader: "style-loader!css-loader"
       }
     ]
   },
